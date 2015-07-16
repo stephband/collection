@@ -1,8 +1,13 @@
 
 // Collection()
 
-(function(ns, mixin, undefined) {
+(function(window) {
 	"use strict";
+
+	var observe   = window.observe;
+	var unobserve = window.unobserve;
+	var mixin     = window.mixin;
+	var assign    = Object.assign;
 
 	var debug = false;
 	var defaults = {
@@ -27,14 +32,6 @@
 		this[i] = value;
 	}
 
-	function setListeners(data, i) {
-		if (!sub.on) { return; }
-
-		//sub
-		//.on('change', this.trigger)
-		//.on('destroy', this.remove);
-	}
-
 	// Sort functions
 
 	function byGreater(a, b) {
@@ -43,26 +40,6 @@
 
 	function byId(a, b) {
 		return a.id > b.id ? 1 : -1 ;
-	}
-
-	// Object functions
-
-	function extend(obj) {
-		var i = 0,
-		    length = arguments.length,
-		    obj2, key;
-
-		while (++i < length) {
-			obj2 = arguments[i];
-
-			for (key in obj2) {
-				if (obj2.hasOwnProperty(key)) {
-					obj[key] = obj2[key];
-				}
-			}
-		}
-
-		return obj;
 	}
 
 	// Collection functions
@@ -112,6 +89,30 @@
 			}) ;
 	}
 
+	function push(collection, object) {
+		Array.prototype.push.call(collection, object);
+		collection.trigger('add', object);
+		return collection;
+	}
+
+	function splice(collection, i, n) {
+		var removed = Array.prototype.splice.call.apply(Array.prototype.splice, arguments);
+		var r = removed.length;
+		var added = Array.prototype.slice.call(arguments, 3);
+		var l = added.length;
+		var a = -1;
+
+		while (r--) {
+			collection.trigger('remove', removed[r], i + r);
+		}
+
+		while (++a < l) {
+			collection.trigger('add', added[a], a);
+		}
+
+		return removed;
+	}
+
 	function add(collection, object) {
 		// Add an item, keeping the collection sorted by id.
 		var index = collection.index;
@@ -121,7 +122,7 @@
 			// ...check that it is not already in the
 			// collection before pushing it in.
 			if (collection.indexOf(object) === -1) {
-				collection.push(object);
+				push(collection, object);
 			}
 
 			return;
@@ -130,7 +131,7 @@
 		var l = collection.length;
 
 		while (collection[--l] && (collection[l][index] > object[index] || !isDefined(collection[l][index])));
-		collection.splice(l + 1, 0, object);
+		splice(collection, l + 1, 0, object);
 	}
 
 	function remove(collection, obj, i) {
@@ -140,7 +141,7 @@
 
 		while (++i < collection.length) {
 			if (obj === collection[i]) {
-				collection.splice(i, 1);
+				splice(collection, i, 1);
 				--i;
 				found = true;
 			}
@@ -164,14 +165,14 @@
 			var l = arguments.length;
 
 			if (l === 0) {
-				if (fn2) { fn2.apply(this); }
+				if (fn2) { fn2.call(this, this); }
 				return this;
 			}
 
 			var n = -1;
 
 			while (++n < l) {
-				fn1.call(this, arguments[n]);
+				fn1.call(this, this, arguments[n]);
 			}
 
 			return this;
@@ -180,15 +181,9 @@
 
 
 	mixin.collection = {
-		add: multiarg(function(item) {
-			add(this, item);
-		}),
+		add: multiarg(add),
 
-		remove: multiarg(function(item) {
-			var object = this.find(item);
-			if (!isDefined(object)) { return; }
-			remove(this, object);
-		}, function() {
+		remove: multiarg(remove, function() {
 			// If item is undefined, remove all objects from the collection.
 			var n = this.length;
 			var object;
@@ -196,17 +191,7 @@
 			while (n--) { this.pop(); }
 		}),
 
-		push: function push() {
-			var l = arguments.length;
-			var n = -1;
-
-			Array.prototype.push.apply(this, arguments);
-			while (++n < l) {
-				this.trigger('add', arguments[n]);
-			}
-
-			return this;
-		},
+		push: multiarg(push),
 
 		pop: function pop() {
 			var i = this.length - 1;
@@ -216,29 +201,17 @@
 			return object;
 		},
 
-		splice: function splice(i, n) {
-			var removed = Array.prototype.splice.apply(this, arguments);
-			var r = removed.length;
-			var added = Array.prototype.slice.call(arguments, 2);
-			var l = added.length;
-			var a = -1;
-
-			while (r--) {
-				this.trigger('remove', removed[r], i + r);
-			}
-
-			while (++a < l) {
-				this.trigger('add', added[a], a);
-			}
-
-			return removed;
+		splice: function() {
+			var args = Array.prototype.slice.apply(arguments);
+			args.unshift(this);
+			return splice.apply(this, args);
 		},
 
-		update: multiarg(function(obj) {
+		update: multiarg(function(collection, obj) {
 			var item = this.find(obj);
 
 			if (item) {
-				extend(item, obj);
+				assign(item, obj);
 				this.trigger('update', item);
 			}
 			else {
@@ -473,7 +446,7 @@
 		}
 
 		var collection = this;
-		var settings = extend({}, defaults, options);
+		var settings = assign({}, defaults, options);
 
 		function byIndex(a, b) {
 			// Sort collection by index.
@@ -495,7 +468,7 @@
 		});
 
 		// Populate the collection
-		array.forEach(setValue, collection);
+		assign(collection, array);
 
 		var length = collection.length = array.length;
 
@@ -519,11 +492,11 @@
 		observe(collection, 'length', observeLength);
 	};
 
-	extend(Collection.prototype, mixin.events, mixin.array, mixin.collection);
+	assign(Collection.prototype, mixin.events, mixin.array, mixin.collection);
 
 	Collection.add = add;
 	Collection.remove = remove;
 	Collection.isCollection = isCollection;
 
-	ns.Collection = Collection;
-})(this, this.mixin);
+	window.Collection = Collection;
+})(this);
