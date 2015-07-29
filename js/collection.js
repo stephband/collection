@@ -140,7 +140,7 @@
 		if (i === undefined) { i = -1; }
 
 		while (++i < collection.length) {
-			if (obj === collection[i]) {
+			if (obj === collection[i] || obj === collection[i][collection.index]) {
 				splice(collection, i, 1);
 				--i;
 				found = true;
