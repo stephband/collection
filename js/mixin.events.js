@@ -30,10 +30,10 @@
 // .trigger(type, [args...])
 // Triggers event of type.
 
-(function(ns) {
+(function(window) {
 	"use strict";
 
-	var mixin = ns.mixin || (ns.mixin = {});
+	var mixin = window.mixin || (window.mixin = {});
 	var eventObject = {};
 	var slice = Function.prototype.call.bind(Array.prototype.slice);
 
@@ -97,7 +97,7 @@
 
 	mixin.events = {
 		// .on(type, fn)
-		// 
+		//
 		// Callback fn is called with this set to the current object
 		// and the arguments (target, triggerArgs..., onArgs...).
 		on: function(types, fn) {
@@ -154,7 +154,7 @@
 
 				return this;
 			}
-			
+
 			// If types is an object with a trigger method, stop propagating
 			// events to it.
 			if (arguments.length === 1 && types.trigger) {

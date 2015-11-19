@@ -258,7 +258,22 @@
 		observe(collection, 'length', createLengthObserver(collection));
 	};
 
-	assign(Collection.prototype, mixin.events, mixin.array, {
+	assign(Collection.prototype, mixin.events, {
+		filter:  Array.prototype.filter,
+		map:     Array.prototype.map,
+		reduce:  Array.prototype.reduce,
+		concat:  Array.prototype.concat,
+		sort:    Array.prototype.sort,
+		slice:   Array.prototype.slice,
+		some:    Array.prototype.some,
+		indexOf: Array.prototype.indexOf,
+		forEach: Array.prototype.forEach,
+
+		each: function each() {
+			Array.prototype.forEach.apply(this, arguments);
+			return this;
+		},
+
 		add: overloadByLength({
 			0: returnThis,
 
