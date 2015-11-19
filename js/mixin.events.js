@@ -139,7 +139,7 @@
 		// with that function. If `callback` is null, removes all callbacks for the
 		// event. If `events` is null, removes all bound callbacks for all events.
 		off: function(types, fn) {
-			var type, calls, list, i, listeners;
+			var type, calls, list, listeners, n;
 
 			// If no arguments passed in, unbind everything.
 			if (arguments.length === 0) {
@@ -178,9 +178,7 @@
 			while (type = types.shift()) {
 				listeners = this.listeners[type];
 
-				if (!listeners) {
-					continue;
-				}
+				if (!listeners) { continue; }
 
 				if (!fn) {
 					this.listeners[type].length = 0;
@@ -188,11 +186,15 @@
 					continue;
 				}
 
-				listeners.forEach(function(v, i) {
-					if (v[0] === fn) {
-						listeners.splice(i, i+1);
+				n = listeners.length;
+
+				// Go through listeners in reverse order to avoid
+				// mucking up the splice indexes.
+				while (n--) {
+					if (listeners[n][0] === fn) {
+						listeners.splice(n, 1);
 					}
-				});
+				}
 			}
 
 			return this;
@@ -200,6 +202,8 @@
 
 		trigger: function(e) {
 			var events = getListeners(this);
+			// Copy delegates. We may be about to mutate the delegates list.
+			var delegates = getDelegates(this).slice();
 			var args = slice(arguments);
 			var type, target, i, l, params, result;
 
@@ -223,19 +227,16 @@
 				}
 			}
 
-			if (!this.delegates) { return this; }
-
-			// Copy delegates. We may be about to mutate the delegates list.
-			var delegates = this.delegates.slice();
+			if (!delegates.length) { return this; }
 
 			i = -1;
 			l = delegates.length;
+			args[0] = eventObject;
 
 			if (typeof e === 'string') {
 				// Prepare the event object. It's ok to reuse a single object,
 				// as trigger calls are synchronous, and the object is internal,
 				// so it does not get exposed.
-				args[0] = eventObject;
 				eventObject.type = type;
 				eventObject.target = target;
 			}
