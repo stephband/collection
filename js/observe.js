@@ -1,10 +1,12 @@
 
 // observe(object, [prop], fn)
 // unobserve(object, [prop], [fn])
-// 
+//
 // Observes object properties for changes by redefining
 // properties of the observable object with setters that
 // fire a callback function whenever the property changes.
+// I warn you, this is hairy stuff. But when it works, it
+// works beautifully.
 
 (function(window){
 	var debug = false;
@@ -138,7 +140,7 @@
 			// Although we can get away with observing
 			// get-only properties, as they don't replace
 			// the setter and they require an explicit call
-			// to notify(). 
+			// to notify().
 			if (descriptor.get && !descriptor.set) {
 				descriptor.get.observers = observers;
 			}
@@ -189,7 +191,7 @@
 			fn = prop;
 			args = slice(arguments, 0);
 			args.splice(1, 0, null);
-			
+
 			for (property in object) {
 				args[1] = property;
 				observeProperty.apply(null, args);
@@ -200,7 +202,7 @@
 
 		observeProperty.apply(null, arguments);
 	}
-	
+
 	function unobserve(object, property, fn) {
 		var index;
 
