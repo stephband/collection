@@ -249,8 +249,11 @@
 			}
 		});
 
-		// Populate the collection
-		assign(collection, array);
+		// Populate the collection. Don't use Object.assign for this, as it
+		// doesn't get values from childNode dom collections.
+		var n = -1;
+		while (array[++n]) { collection[n] = array[n]; }
+
 		collection.length = array.length;
 
 		// Sort the collection
