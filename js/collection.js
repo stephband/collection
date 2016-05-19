@@ -246,7 +246,8 @@
 					// passed into options, or passed into the .sort(fn) call.
 					Array.prototype.sort.call(this, fn || options.sort || byIndex);
 					return this.trigger('sort');
-				}
+				},
+				writable: true
 			}
 		});
 
