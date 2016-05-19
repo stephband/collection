@@ -538,7 +538,7 @@
 			.on('remove', subsetRemove);
 		}
 
-		subset.destroy = function() {
+		this.destroy = function() {
 			// Lots of unbinding
 			destroy(collection);
 
@@ -553,7 +553,7 @@
 		this.synchronise = function() {
 			// Force a sync from code that only has access
 			// to the subset.
-			this.forEach(update);
+			collection.forEach(update);
 		};
 	}
 
