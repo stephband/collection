@@ -244,7 +244,8 @@
 				value: function sort(fn) {
 					// Collections get sorted by index by default, or by a function
 					// passed into options, or passed into the .sort(fn) call.
-					return Array.prototype.sort.call(this, fn || options.sort || byIndex);
+					Array.prototype.sort.call(this, fn || options.sort || byIndex);
+					return this.trigger('sort');
 				}
 			}
 		});
@@ -554,6 +555,7 @@
 			// Force a sync from code that only has access
 			// to the subset.
 			collection.forEach(update);
+			return this;
 		};
 	}
 
