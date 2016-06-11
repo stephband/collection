@@ -4,10 +4,11 @@
 (function(window) {
 	"use strict";
 
+	var assign    = Object.assign;
+	var Fn        = window.Fn;
 	var observe   = window.observe;
 	var unobserve = window.unobserve;
 	var mixin     = window.mixin;
-	var assign    = Object.assign;
 
 	var debug = false;
 
@@ -16,26 +17,12 @@
 
 	// Utils
 
-	function returnUndefined() { return; }
-
 	function returnThis() { return this; }
-
-	function returnArgument(arg) { return arg; }
-
-	function isDefined(val) {
-		return val !== undefined && val !== null;
-	}
 
 	// Each functions
 
 	function setValue(value, i) {
 		this[i] = value;
-	}
-
-	// Sort functions
-
-	function byGreater(a, b) {
-		return a > b ? 1 : -1 ;
 	}
 
 	// Collection functions
@@ -123,7 +110,7 @@
 		var index = collection.index;
 
 		// If the object does not have an index key...
-		if (!isDefined(object[index])) {
+		if (!Fn.isDefined(object[index])) {
 			// ...check that it is not already in the
 			// collection before pushing it in.
 			if (collection.indexOf(object) === -1) {
@@ -136,7 +123,7 @@
 		// Insert the object in the correct index. TODO: we
 		// should use the sort function for this!
 		var l = collection.length;
-		while (collection[--l] && (collection[l][index] > object[index] || !isDefined(collection[l][index])));
+		while (collection[--l] && (collection[l][index] > object[index] || !Fn.isDefined(collection[l][index])));
 		splice(collection, l + 1, 0, object);
 	}
 
@@ -224,7 +211,7 @@
 		if (array === undefined) {
 			array = [];
 		}
-		else if (!isDefined(array.length)) {
+		else if (!Fn.isDefined(array.length)) {
 			settings = array;
 			array = [];
 		}
@@ -325,7 +312,7 @@
 		},
 
 		find: overloadByLength({
-			0: returnUndefined,
+			0: Fn.noop,
 
 			1: function findObject(object) {
 				// Fast out. If object in collection, return it.
