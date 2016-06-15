@@ -253,7 +253,30 @@
 		observe(collection, 'length', createLengthObserver(collection));
 	};
 
+	assign(Collection, {
+		// Fantasy land .of()
+		of: function() {
+			return Collection(arguments);
+		},
+
+		add: add,
+		remove: remove,
+		isCollection: isCollection
+	});
+
 	assign(Collection.prototype, mixin.events, {
+		// Fantasy land .of()
+		of: function() {
+			return Collection(arguments);
+		},
+
+		// Fantasy land .ap()
+		ap: function(object) {
+			return this.map(function(fn) {
+				return object.map(fn);
+			});
+		},
+
 		filter:  Array.prototype.filter,
 		map:     Array.prototype.map,
 		reduce:  Array.prototype.reduce,
@@ -548,10 +571,6 @@
 	}
 
 	assign(SubCollection.prototype, Collection.prototype);
-
-	Collection.add = add;
-	Collection.remove = remove;
-	Collection.isCollection = isCollection;
 
 	window.Collection = Collection;
 })(this);
