@@ -324,6 +324,12 @@
 			return object;
 		},
 
+		shift: function() {
+			var object = this[0];
+			this.remove(object);
+			return object;
+		},
+
 		splice: function() {
 			Array.prototype.unshift.call(arguments, this);
 			return splice.apply(this, arguments);
