@@ -368,7 +368,7 @@
 			return this.indexOf(object) !== -1;
 		},
 
-		get: function(property) {
+		getAll: function(property) {
 			// Get the value of a property of all the objects in
 			// the collection if they all have the same value.
 			// Otherwise return undefined.
@@ -384,7 +384,7 @@
 			return this[n][property];
 		},
 
-		set: function(property, value) {
+		setAll: function(property, value) {
 			// Set a property on every object in the collection.
 
 			if (arguments.length !== 2) {
